@@ -13,4 +13,11 @@ class MINERVA_API AMinervaCharacter : public AMinervaCharacterBase
 	
 public:
 	AMinervaCharacter();
+
+	virtual void PossessedBy(AController* NewController) override;
+
+	virtual void OnRep_PlayerState() override;
+
+protected:
+	void InitAbilityActorInfo();
 };

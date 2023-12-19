@@ -17,3 +17,8 @@ void AMinervaCharacterBase::BeginPlay()
 	Super::BeginPlay();
 	
 }
+
+UAbilitySystemComponent* AMinervaCharacterBase::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
