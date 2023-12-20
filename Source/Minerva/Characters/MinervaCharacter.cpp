@@ -21,6 +21,8 @@ AMinervaCharacter::AMinervaCharacter()
 
 void AMinervaCharacter::PossessedBy(AController* NewController)
 {
+	Super::PossessedBy(NewController);
+
 	// Init ability actor info for the Server
 	InitAbilityActorInfo();
 }

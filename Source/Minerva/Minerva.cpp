@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Midnight Madness Inc.
 
 #include "Minerva.h"
 #include "Modules/ModuleManager.h"

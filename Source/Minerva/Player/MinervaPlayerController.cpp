@@ -1,4 +1,4 @@
-// Midnight Madness Inc 
+// Midnight Madness Inc.
 
 
 #include "MinervaPlayerController.h"
