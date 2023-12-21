@@ -35,6 +35,7 @@ void AMinervaEffectActor::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCo
 		const auto MinervaAttributeSet = Cast<UMinervaAttributeSet>(ASCInterface->GetAbilitySystemComponent()->GetAttributeSet(UMinervaAttributeSet::StaticClass()));
 		auto MutableMinervaAttributeSet = const_cast<UMinervaAttributeSet*>(MinervaAttributeSet);
 		MutableMinervaAttributeSet->SetHealth(MinervaAttributeSet->GetHealth() + 25.f);
+		MutableMinervaAttributeSet->SetMana(MinervaAttributeSet->GetMana() - 25.f);
 		Destroy();
 	}
 }

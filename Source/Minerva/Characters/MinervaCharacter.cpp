@@ -5,6 +5,8 @@
 
 #include "AbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Minerva/HUD/Minerva_HUD.h"
+#include "Minerva/Player/MinervaPlayerController.h"
 #include "Minerva/Player/MinervaPlayerState.h"
 
 AMinervaCharacter::AMinervaCharacter()
@@ -42,4 +44,9 @@ void AMinervaCharacter::InitAbilityActorInfo()
 	MinervaPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(MinervaPlayerState, this);
 	AbilitySystemComponent = MinervaPlayerState->GetAbilitySystemComponent();
 	AttributeSet = MinervaPlayerState->GetAttributeSet();
+	
+	if (auto MinervaPlayerController = Cast<AMinervaPlayerController>(GetController()))
+	{
+		if (auto Minvera_HUD = Cast<AMinerva_HUD>(MinervaPlayerController->GetHUD())) Minvera_HUD->InitOverlay(MinervaPlayerController, MinervaPlayerState, AbilitySystemComponent, AttributeSet);
+	}
 }
