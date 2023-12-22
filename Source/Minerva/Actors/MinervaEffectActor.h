@@ -4,9 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayEffectTypes.h"
 #include "MinervaEffectActor.generated.h"
 
-class USphereComponent;
+class UGameplayEffect;
+class UAbilitySystemComponent;
+
+UENUM(BlueprintType)
+enum class EEffectApplicationPolicy
+{
+	ApplyOnBeginOverlap,
+	ApplyOnEndOverlap,
+	DoNotApply
+};
+
+UENUM(BlueprintType)
+enum class EEffectRemovalPolicy
+{
+	RemoveOnEndOverlap,
+	DoNotRemove
+};
 
 UCLASS()
 class MINERVA_API AMinervaEffectActor : public AActor
@@ -19,16 +36,45 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UFUNCTION()
-	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION(BlueprintCallable)
+	void ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> GameplayEffectClass);
 
-	UFUNCTION()
-	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION(BlueprintCallable)
+	void OnBeginOverlap(AActor* TargetActor);
+
+	UFUNCTION(BlueprintCallable)
+	void OnEndOverlap(AActor* TargetActor);
+
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UStaticMeshComponent> Mesh;
+	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USphereComponent> Sphere;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	float ActorLevel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	bool bDestroyOnEffectRemoval;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	EEffectApplicationPolicy InstantEffectApplicationPolicy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> DurationGameplayEffectClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	EEffectApplicationPolicy DurationEffectApplicationPolicy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> InfiniteGameplayEffectClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	EEffectApplicationPolicy InfiniteEffectApplicationPolicy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = "true"))
+	EEffectRemovalPolicy InfiniteEffectRemovalPolicy;
+
+	
 };
