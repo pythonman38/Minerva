@@ -18,6 +18,10 @@ void AMinervaCharacterBase::BeginPlay()
 	
 }
 
+void AMinervaCharacterBase::InitAbilityActorInfo()
+{
+}
+
 UAbilitySystemComponent* AMinervaCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
