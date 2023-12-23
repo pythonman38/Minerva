@@ -7,7 +7,8 @@
 #include "Minerva/AbilitySystem/MinervaAttributeSet.h"
 #include "Minerva/Minerva.h"
 
-AMinervaEnemy::AMinervaEnemy()
+AMinervaEnemy::AMinervaEnemy() :
+	Level(1)
 {
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
@@ -31,6 +32,11 @@ void AMinervaEnemy::UnHighlightActor()
 {
 	GetMesh()->SetRenderCustomDepth(false);
 	Weapon->SetRenderCustomDepth(false);
+}
+
+int32 AMinervaEnemy::GetPlayerLevel()
+{
+	return Level;
 }
 
 void AMinervaEnemy::BeginPlay()

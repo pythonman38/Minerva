@@ -37,6 +37,13 @@ void AMinervaCharacter::OnRep_PlayerState()
 	InitAbilityActorInfo();
 }
 
+int32 AMinervaCharacter::GetPlayerLevel()
+{
+	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	return MinervaPlayerState->GetPlayerLevel();
+}
+
 void AMinervaCharacter::InitAbilityActorInfo()
 {
 	auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
@@ -50,4 +57,6 @@ void AMinervaCharacter::InitAbilityActorInfo()
 	{
 		if (auto Minvera_HUD = Cast<AMinerva_HUD>(MinervaPlayerController->GetHUD())) Minvera_HUD->InitOverlay(MinervaPlayerController, MinervaPlayerState, AbilitySystemComponent, AttributeSet);
 	}
+
+	InitializeDefaultAttributes();
 }

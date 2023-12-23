@@ -3,6 +3,8 @@
 
 #include "MinervaCharacterBase.h"
 
+#include "AbilitySystemComponent.h"
+
 AMinervaCharacterBase::AMinervaCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -20,6 +22,23 @@ void AMinervaCharacterBase::BeginPlay()
 
 void AMinervaCharacterBase::InitAbilityActorInfo()
 {
+}
+
+void AMinervaCharacterBase::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const
+{
+	check(IsValid(GetAbilitySystemComponent()));
+	check(GameplayEffectClass);
+	auto ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	ContextHandle.AddSourceObject(this);
+	const auto SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffectClass, Level, ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), GetAbilitySystemComponent());
+}
+
+void AMinervaCharacterBase::InitializeDefaultAttributes() const
+{
+	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
+	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
+	ApplyEffectToSelf(DefaultVitalAttributes, 1.f);
 }
 
 UAbilitySystemComponent* AMinervaCharacterBase::GetAbilitySystemComponent() const

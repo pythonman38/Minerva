@@ -5,13 +5,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "Minerva/Interaction/CombatInterface.h"
 #include "MinervaCharacterBase.generated.h"
 
 class UAbilitySystemComponent;
 class UAttributeSet;
+class UGameplayEffect;
 
 UCLASS(Abstract)
-class MINERVA_API AMinervaCharacterBase : public ACharacter, public IAbilitySystemInterface
+class MINERVA_API AMinervaCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -23,6 +25,10 @@ protected:
 
 	virtual void InitAbilityActorInfo();
 
+	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
+
+	void InitializeDefaultAttributes() const;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	TObjectPtr<USkeletalMeshComponent> Weapon;
@@ -32,6 +38,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability System")
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attributes)
+	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attributes)
+	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attributes)
+	TSubclassOf<UGameplayEffect> DefaultVitalAttributes;
 
 public:
 	// Inherited via IAbilitySystemInterface
