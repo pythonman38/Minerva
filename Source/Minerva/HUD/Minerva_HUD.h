@@ -7,6 +7,7 @@
 #include "Minerva_HUD.generated.h"
 
 class UAbilitySystemComponent;
+class UAttributeMenuWidgetController;
 class UAttributeSet;
 class UMinervaUserWidget;
 class UOverlayWidgetController;
@@ -21,6 +22,8 @@ class MINERVA_API AMinerva_HUD : public AHUD
 public:
 	UOverlayWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& WCParams);
 
+	UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams);
+
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
 
 private:
@@ -34,5 +37,11 @@ private:
 	TObjectPtr<UOverlayWidgetController> OverlayWidgetController;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Minerva_HUD, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;	
+	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
+
+	UPROPERTY(BlueprintReadOnly, Category = Minerva_HUD, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuWidgetController;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Minerva_HUD, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UAttributeMenuWidgetController> AttributeMenuWidgetControllerClass;
 };

@@ -3,6 +3,7 @@
 
 #include "Minerva_HUD.h"
 
+#include "Minerva/HUD/AttributeMenuWidgetController.h"
 #include "Minerva/HUD/MinervaUserWidget.h"
 #include "Minerva/HUD/OverlayWidgetController.h"
 
@@ -16,6 +17,18 @@ UOverlayWidgetController* AMinerva_HUD::GetOverlayWidgetController(const FWidget
 	}
 
 	return OverlayWidgetController;
+}
+
+UAttributeMenuWidgetController* AMinerva_HUD::GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams)
+{
+	if (AttributeMenuWidgetController == nullptr)
+	{
+		AttributeMenuWidgetController = NewObject<UAttributeMenuWidgetController>(this, AttributeMenuWidgetControllerClass);
+		AttributeMenuWidgetController->SetWidgetControllerParams(WCParams);
+		AttributeMenuWidgetController->BindCallbacksToDependencies();
+	}
+
+	return AttributeMenuWidgetController;
 }
 
 void AMinerva_HUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)

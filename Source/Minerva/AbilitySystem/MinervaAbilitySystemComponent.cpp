@@ -3,6 +3,8 @@
 
 #include "MinervaAbilitySystemComponent.h"
 
+#include "Minerva/Singletons/MinervaGameplayTags.h"
+
 void UMinervaAbilitySystemComponent::AbilityActorInfoSet()
 {
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UMinervaAbilitySystemComponent::EffectApplied);
