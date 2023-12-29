@@ -10,6 +10,7 @@
 
 class UAbilitySystemComponent;
 class UAttributeSet;
+class UGameplayAbility;
 class UGameplayEffect;
 
 UCLASS(Abstract)
@@ -29,9 +30,16 @@ protected:
 
 	void InitializeDefaultAttributes() const;
 
+	void AddCharacterAbilities();
+
+	virtual FVector GetCombatSocketLocation() override;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	TObjectPtr<USkeletalMeshComponent> Weapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	FName WeaponTipSocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability System")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -47,6 +55,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attributes)
 	TSubclassOf<UGameplayEffect> DefaultVitalAttributes;
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 
 public:
 	// Inherited via IAbilitySystemInterface

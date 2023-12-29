@@ -3,7 +3,7 @@
 
 #include "MinervaCharacterBase.h"
 
-#include "AbilitySystemComponent.h"
+#include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
 
 AMinervaCharacterBase::AMinervaCharacterBase()
 {
@@ -17,7 +17,6 @@ AMinervaCharacterBase::AMinervaCharacterBase()
 void AMinervaCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AMinervaCharacterBase::InitAbilityActorInfo()
@@ -39,6 +38,19 @@ void AMinervaCharacterBase::InitializeDefaultAttributes() const
 	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultVitalAttributes, 1.f);
+}
+
+void AMinervaCharacterBase::AddCharacterAbilities()
+{
+	auto MinervaASC = CastChecked<UMinervaAbilitySystemComponent>(AbilitySystemComponent);
+	if (!HasAuthority()) return;
+	MinervaASC->AddCharacterAbilities(StartupAbilities);
+}
+
+FVector AMinervaCharacterBase::GetCombatSocketLocation()
+{
+	check(Weapon);
+	return Weapon->GetSocketLocation(WeaponTipSocketName);
 }
 
 UAbilitySystemComponent* AMinervaCharacterBase::GetAbilitySystemComponent() const

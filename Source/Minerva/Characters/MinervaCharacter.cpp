@@ -27,6 +27,7 @@ void AMinervaCharacter::PossessedBy(AController* NewController)
 
 	// Init ability actor info for the Server
 	InitAbilityActorInfo();
+	AddCharacterAbilities();
 }
 
 void AMinervaCharacter::OnRep_PlayerState()

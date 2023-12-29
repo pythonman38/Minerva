@@ -4,11 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GameplayTagContainer.h"
 #include "MinervaPlayerController.generated.h"
 
 class IEnemyInterface;
 class UInputAction;
 class UInputMappingContext;
+class UMinervaAbilitySystemComponent;
+class UMinervaInputConfig;
+class USplineComponent;
 
 struct FInputActionValue;
 
@@ -35,13 +39,43 @@ protected:
 
 	void CursorTrace();
 
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+
+	void AbilityInputTagReleased(FGameplayTag InputTag);
+
+	void AbilityInputTagHeld(FGameplayTag InputTag);
+
+	void AutoRun();
+
+	UMinervaAbilitySystemComponent* GetASC();
+
 private:
+	float FollowTime, ShortPressThreshold;
+
+	bool bAutoRunning, bTargeting;
+
 	IEnemyInterface* LastActor;
 	IEnemyInterface* ThisActor;
+
+	FVector CachedDestination;
+
+	FHitResult CursorHit;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float AutoRunAcceptanceRadius;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> MinervaMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> MoveAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UMinervaInputConfig> InputConfig;
+
+	UPROPERTY(BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UMinervaAbilitySystemComponent> MinervaAbilitySystemComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USplineComponent> Spline;
 };

@@ -3,13 +3,27 @@
 
 #include "MinervaPlayerController.h"
 
-#include "EnhancedInputComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "Components/SplineComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
+#include "Minerva/Input/MinervaInputComponent.h"
 #include "Minerva/Interaction/EnemyInterface.h"
+#include "Minerva/Singletons/MinervaGameplayTags.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 
-AMinervaPlayerController::AMinervaPlayerController()
+AMinervaPlayerController::AMinervaPlayerController() :
+	CachedDestination(FVector::ZeroVector),
+	FollowTime(0.f),
+	ShortPressThreshold(0.5f),
+	AutoRunAcceptanceRadius(50.f),
+	bAutoRunning(false),
+	bTargeting(false)
 {
 	bReplicates = true;
+
+	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
 void AMinervaPlayerController::PlayerTick(float DeltaTime)
@@ -17,6 +31,23 @@ void AMinervaPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	CursorTrace();
+
+	AutoRun();
+}
+
+void AMinervaPlayerController::AutoRun()
+{
+	if (!bAutoRunning) return;
+
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		ControlledPawn->AddMovementInput(Direction);
+
+		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
+		if (DistanceToDestination <= AutoRunAcceptanceRadius) bAutoRunning = false;
+	}
 }
 
 void AMinervaPlayerController::BeginPlay()
@@ -31,10 +62,14 @@ void AMinervaPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	// Set up action bindings
-	if (auto EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
+	if (auto MinervaInputComponent = CastChecked<UMinervaInputComponent>(InputComponent))
 	{
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMinervaPlayerController::Move);
+		MinervaInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMinervaPlayerController::Move);
+
+		// Spell Casting
+		MinervaInputComponent->BindAbilityActions(InputConfig, this, &AMinervaPlayerController::AbilityInputTagPressed, &AMinervaPlayerController::AbilityInputTagReleased, 
+			&AMinervaPlayerController::AbilityInputTagHeld);
 	}
 }
 
@@ -78,7 +113,6 @@ void AMinervaPlayerController::SetInputModes()
 
 void AMinervaPlayerController::CursorTrace()
 {
-	FHitResult CursorHit;
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 
@@ -90,4 +124,81 @@ void AMinervaPlayerController::CursorTrace()
 		if (LastActor) LastActor->UnHighlightActor();
 		if (ThisActor) ThisActor->HighlightActor();
 	}
+}
+
+void AMinervaPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	if (InputTag.MatchesTagExact(FMinervaGameplayTags::Get().InputTag_LMB))
+	{
+		bTargeting = ThisActor ? true : false;
+		bAutoRunning = false;
+	}
+}
+
+void AMinervaPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	if (!InputTag.MatchesTagExact(FMinervaGameplayTags::Get().InputTag_LMB))
+	{
+		if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
+		return;
+	}
+	if (bTargeting)
+	{
+		if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
+	}
+	else
+	{
+		const APawn* ControlledPawn = GetPawn();
+		if (FollowTime <= ShortPressThreshold && ControlledPawn)
+		{
+			if (auto NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
+			{
+				Spline->ClearSplinePoints();
+				for (const FVector& PointLoc : NavPath->PathPoints)
+				{
+					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
+				}
+				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+				bAutoRunning = true;
+			}
+		}
+		FollowTime = 0.f;
+		bTargeting = false;
+	}
+}
+
+void AMinervaPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
+{
+
+	if (!InputTag.MatchesTagExact(FMinervaGameplayTags::Get().InputTag_LMB))
+	{
+		if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
+		return;
+	}
+
+	if (bTargeting)
+	{
+		if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
+	}
+	else
+	{
+		FollowTime += GetWorld()->GetDeltaSeconds();
+		if (CursorHit.bBlockingHit) CachedDestination = CursorHit.ImpactPoint;
+
+		if (APawn* ControlledPawn = GetPawn())
+		{
+			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+			ControlledPawn->AddMovementInput(WorldDirection);
+		}
+	}
+}
+
+UMinervaAbilitySystemComponent* AMinervaPlayerController::GetASC()
+{
+	if (MinervaAbilitySystemComponent == nullptr)
+	{
+		MinervaAbilitySystemComponent = Cast<UMinervaAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	}
+	
+	return MinervaAbilitySystemComponent;
 }
