@@ -3,7 +3,9 @@
 
 #include "MinervaAssetManager.h"
 
+#include "AbilitySystemGlobals.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
+
 
 UMinervaAssetManager& UMinervaAssetManager::Get()
 {
@@ -17,4 +19,7 @@ void UMinervaAssetManager::StartInitialLoading()
 	Super::StartInitialLoading();
 
 	FMinervaGameplayTags::InitializeNativeGameplayTags();
+
+	// This is required to use Target Data!
+	UAbilitySystemGlobals::Get().InitGlobalData();
 }

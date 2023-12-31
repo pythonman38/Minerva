@@ -19,7 +19,8 @@ AMinervaPlayerController::AMinervaPlayerController() :
 	ShortPressThreshold(0.5f),
 	AutoRunAcceptanceRadius(50.f),
 	bAutoRunning(false),
-	bTargeting(false)
+	bTargeting(false),
+	bShiftKeyDown(false)
 {
 	bReplicates = true;
 
@@ -66,6 +67,10 @@ void AMinervaPlayerController::SetupInputComponent()
 	{
 		// Moving
 		MinervaInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMinervaPlayerController::Move);
+
+		// Shift Spell Casting
+		MinervaInputComponent->BindAction(ShiftAction, ETriggerEvent::Started, this, &AMinervaPlayerController::ShiftPressed);
+		MinervaInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed, this, &AMinervaPlayerController::ShiftReleased);
 
 		// Spell Casting
 		MinervaInputComponent->BindAbilityActions(InputConfig, this, &AMinervaPlayerController::AbilityInputTagPressed, &AMinervaPlayerController::AbilityInputTagReleased, 
@@ -142,11 +147,8 @@ void AMinervaPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
 		return;
 	}
-	if (bTargeting)
-	{
-		if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
-	}
-	else
+	if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
+	if (!bTargeting && !bShiftKeyDown)
 	{
 		const APawn* ControlledPawn = GetPawn();
 		if (FollowTime <= ShortPressThreshold && ControlledPawn)
@@ -176,7 +178,7 @@ void AMinervaPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		return;
 	}
 
-	if (bTargeting)
+	if (bTargeting || bShiftKeyDown)
 	{
 		if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
 	}

@@ -25,13 +25,13 @@ protected:
 	void OnRep_Level(int32 OldLevel);
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level, ReplicatedUsing = OnRep_Level, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level, ReplicatedUsing = OnRep_Level, meta = (AllowPrivateAccess = true))
 	int32 Level;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ability System", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AbilitySystem, meta = (AllowPrivateAccess = true))
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ability System", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AbilitySystem, meta = (AllowPrivateAccess = true))
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 public:

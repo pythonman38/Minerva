@@ -20,6 +20,6 @@ protected:
 	void WidgetControllerSet();
 	
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 	TObjectPtr<UObject> WidgetController;
 };

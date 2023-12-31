@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "MinervaCharacterBase.h"
 #include "Minerva/Interaction/EnemyInterface.h"
+#include "Minerva/HUD/OverlayWidgetController.h"
 #include "MinervaEnemy.generated.h"
+
+class UWidgetComponent;
 
 UCLASS()
 class MINERVA_API AMinervaEnemy : public AMinervaCharacterBase, public IEnemyInterface
@@ -22,12 +25,23 @@ public:
 	// Inherited via ICombatInterface
 	virtual int32 GetPlayerLevel() override;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnAttributeChangedSignature OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAttributeChangedSignature OnMaxHealthChanged;
+
 protected:
 	virtual void BeginPlay() override;
+
+	void SetEnemyWidgetController();
 
 	virtual void InitAbilityActorInfo() override;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults", meta = (AllowPrivateAccess = true))
 	int32 Level;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widgets, meta = (AllowPrivateAccess = true))
+	TObjectPtr<UWidgetComponent> HealthBar;
 };

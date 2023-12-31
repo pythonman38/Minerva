@@ -47,15 +47,15 @@ public:
 	virtual void BindCallbacksToDependencies();
 	
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WidgetController")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = WidgetController)
 	TObjectPtr<APlayerController> PlayerController;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WidgetController")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = WidgetController)
 	TObjectPtr<APlayerState> PlayerState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WidgetController")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = WidgetController)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WidgetController")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = WidgetController)
 	TObjectPtr<UAttributeSet> AttributeSet;
 };

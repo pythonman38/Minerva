@@ -60,7 +60,7 @@ public:
 	FMessageWidgetRowSignature MessageWidgetRowDelegate;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = WidgetData)
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
 
 	template<typename T>
