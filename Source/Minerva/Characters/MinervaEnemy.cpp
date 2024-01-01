@@ -6,11 +6,13 @@
 #include "Components/WidgetComponent.h"
 #include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
 #include "Minerva/AbilitySystem/MinervaAttributeSet.h"
+#include "Minerva/AbilitySystem/MinervaAbilitySystemLibrary.h"
 #include "Minerva/HUD/MinervaUserWidget.h"
 #include "Minerva/Minerva.h"
 
 AMinervaEnemy::AMinervaEnemy() :
-	Level(1)
+	Level(1),
+	CharacterClass(ECharacterClass::Warrior)
 {
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
@@ -76,4 +78,9 @@ void AMinervaEnemy::InitAbilityActorInfo()
 	Cast<UMinervaAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
 	InitializeDefaultAttributes();
+}
+
+void AMinervaEnemy::InitializeDefaultAttributes() const
+{
+	UMinervaAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }

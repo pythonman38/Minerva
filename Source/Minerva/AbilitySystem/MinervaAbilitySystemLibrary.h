@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Minerva/AbilitySystem/CharacterClassInfo.h"
 #include "MinervaAbilitySystemLibrary.generated.h"
 
 class UOverlayWidgetController;
+class UAbilitySystemComponent;
 class UAttributeMenuWidgetController;
 
 UCLASS()
@@ -20,4 +22,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "MinervaAbilitySystemLibrary|WidgetController")
 	static UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, Category = "MinervaAbilitySystemLibrary|CharacterClassDefaults")
+	static void InitializeDefaultAttributes(const UObject* WorldContextObject, ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC);
 };
