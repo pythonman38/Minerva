@@ -6,6 +6,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameFramework/Character.h"
 #include "GameplayEffectExtension.h"
+#include "Kismet/GameplayStatics.h"
+#include "Minerva/Interaction/CombatInterface.h"
+#include "Minerva/Player/MinervaPlayerController.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
 #include "Net/UnrealNetwork.h"
 
@@ -81,6 +84,32 @@ void UMinervaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCal
 		UE_LOG(LogTemp, Warning, TEXT("Changed Health on %s, Health: %f."), *Props.TargetAvatarActor->GetName(), GetHealth());
 	}
 	if (Data.EvaluatedData.Attribute == GetManaAttribute()) SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
+	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	{
+		const float LocalIncomingDamage = GetIncomingDamage();
+		SetIncomingDamage(0.f);
+		if (LocalIncomingDamage > 0.f)
+		{
+			const float NewHealth = GetHealth() - LocalIncomingDamage;
+			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
+
+			if (const bool bFatal = NewHealth <= 0.f)
+			{
+				if (auto CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
+				{
+					CombatInterface->Die();
+				}
+			}
+			else
+			{
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FMinervaGameplayTags::Get().Effects_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			}
+
+			ShowFloatingText(Props, LocalIncomingDamage);
+		}
+	}
 }
 
 void UMinervaAttributeSet::OnRep_Strength(const FGameplayAttributeData& OldStrength) const
@@ -178,7 +207,7 @@ void UMinervaAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackD
 		{
 			if (const APawn* Pawn = Cast<APawn>(Props.SourceAvatarActor)) Props.SourceController = Pawn->GetController();
 		}
-		if (Props.SourceController) auto SourceCharacter = Cast<ACharacter>(Props.SourceController->GetPawn());
+		if (Props.SourceController) Props.SourceCharacter = Cast<ACharacter>(Props.SourceController->GetPawn());
 	}
 
 	if (Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo->AvatarActor.IsValid())
@@ -187,5 +216,16 @@ void UMinervaAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackD
 		Props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
 		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);
 		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Props.TargetAvatarActor);
+	}
+}
+
+void UMinervaAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage) const
+{
+	if (Props.SourceCharacter != Props.TargetCharacter)
+	{
+		if (auto PC = Cast<AMinervaPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0)))
+		{
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter);
+		}
 	}
 }

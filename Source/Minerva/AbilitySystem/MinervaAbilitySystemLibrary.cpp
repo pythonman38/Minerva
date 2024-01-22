@@ -46,26 +46,41 @@ UAttributeMenuWidgetController* UMinervaAbilitySystemLibrary::GetAttributeMenuWi
 
 void UMinervaAbilitySystemLibrary::InitializeDefaultAttributes(const UObject* WorldContextObject, ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC)
 {
+	const auto AvatarActor = ASC->GetAvatarActor();
+	auto CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	const auto ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
+
+	auto PrimaryAttributesContextHandle = ASC->MakeEffectContext();
+	PrimaryAttributesContextHandle.AddSourceObject(AvatarActor);
+	const auto PrimaryAttributesSpecHandle = ASC->MakeOutgoingSpec(ClassDefaultInfo.PrimaryAttributes, Level, PrimaryAttributesContextHandle);
+	ASC->ApplyGameplayEffectSpecToSelf(*PrimaryAttributesSpecHandle.Data.Get());
+
+	auto SecondaryAttributesContextHandle = ASC->MakeEffectContext();
+	SecondaryAttributesContextHandle.AddSourceObject(AvatarActor);
+	const auto SecondaryAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttributes, Level, SecondaryAttributesContextHandle);
+	ASC->ApplyGameplayEffectSpecToSelf(*SecondaryAttributesSpecHandle.Data.Get());
+
+	auto VitalAttributesContextHandle = ASC->MakeEffectContext();
+	VitalAttributesContextHandle.AddSourceObject(AvatarActor);
+	const auto VitalAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->VitalAttributes, Level, VitalAttributesContextHandle);
+	ASC->ApplyGameplayEffectSpecToSelf(*VitalAttributesSpecHandle.Data.Get());
+}
+
+void UMinervaAbilitySystemLibrary::GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC)
+{
+	auto CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	for (auto AbilityClass : CharacterClassInfo->CommonAbilities)
+	{
+		auto AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
+		ASC->GiveAbility(AbilitySpec);
+	}
+}
+
+UCharacterClassInfo* UMinervaAbilitySystemLibrary::GetCharacterClassInfo(const UObject* WorldContextObject)
+{
 	if (auto MinervaGameMode = Cast<AMinervaGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
 	{
-		auto AvatarActor = ASC->GetAvatarActor();
-		auto CharacterClassInfo = MinervaGameMode->CharacterClassInfo;
-		const auto ClassDefaultInfo = MinervaGameMode->CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
-
-		auto PrimaryAttributesContextHandle = ASC->MakeEffectContext();
-		PrimaryAttributesContextHandle.AddSourceObject(AvatarActor);
-		const auto PrimaryAttributesSpecHandle = ASC->MakeOutgoingSpec(ClassDefaultInfo.PrimaryAttributes, Level, PrimaryAttributesContextHandle);
-		ASC->ApplyGameplayEffectSpecToSelf(*PrimaryAttributesSpecHandle.Data.Get());
-
-		auto SecondaryAttributesContextHandle = ASC->MakeEffectContext();
-		SecondaryAttributesContextHandle.AddSourceObject(AvatarActor);
-		const auto SecondaryAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttributes, Level, SecondaryAttributesContextHandle);
-		ASC->ApplyGameplayEffectSpecToSelf(*SecondaryAttributesSpecHandle.Data.Get());
-
-		auto VitalAttributesContextHandle = ASC->MakeEffectContext();
-		VitalAttributesContextHandle.AddSourceObject(AvatarActor);
-		const auto VitalAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->VitalAttributes, Level, VitalAttributesContextHandle);
-		ASC->ApplyGameplayEffectSpecToSelf(*VitalAttributesSpecHandle.Data.Get());
+		return MinervaGameMode->CharacterClassInfo;
 	}
-	else return;
+	else return nullptr;
 }

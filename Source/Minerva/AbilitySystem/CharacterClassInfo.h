@@ -7,6 +7,7 @@
 #include "CharacterClassInfo.generated.h"
 
 class UGameplayEffect;
+class UGameplayAbility;
 
 UENUM(BlueprintType)
 enum class ECharacterClass : uint8
@@ -31,9 +32,6 @@ class MINERVA_API UCharacterClassInfo : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass);
-	
-public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = CharacterClassDefaults)
 	TMap<ECharacterClass, FCharacterClassDefaultInfo> CharacterClassInformation;
 
@@ -41,5 +39,15 @@ public:
 	TSubclassOf<UGameplayEffect> SecondaryAttributes;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = CommonClassDefaults)
+	TArray<TSubclassOf<UGameplayAbility>> CommonAbilities;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = CommonClassDefaults)
 	TSubclassOf<UGameplayEffect> VitalAttributes;
+
+	UPROPERTY(EditDefaultsOnly, Category = "CommonClassDefaults|Damage")
+	TObjectPtr<UCurveTable> DamageCalculationCoefficents;
+
+public:
+	// Getters for private variables
+	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass);
 };

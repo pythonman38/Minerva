@@ -25,6 +25,12 @@ public:
 
 	// Inherited via ICombatInterface
 	virtual int32 GetPlayerLevel() override;
+	virtual void Die() override;
+
+	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat)
+	bool bHitReacting;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnHealthChanged;
@@ -42,6 +48,8 @@ protected:
 	virtual void InitializeDefaultAttributes() const override;
 
 private:
+	float BaseWalkSpeed, LifeSpan;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults", meta = (AllowPrivateAccess = true))
 	int32 Level;
 

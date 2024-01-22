@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "Minerva/Actors/MinervaProjectile.h"
 #include "Minerva/Interaction/CombatInterface.h"
+#include "Minerva/Singletons/MinervaGameplayTags.h"
 
 void UMinervaProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, 
 	const FGameplayEventData* TriggerEventData)
@@ -33,6 +34,10 @@ void UMinervaProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLoc
 
 		const auto SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 		const auto SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
+
+		const auto GameplayTags = FMinervaGameplayTags::Get();
+		const auto ScaledDamage = Damage.GetValueAtLevel(10);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, ScaledDamage);
 		Projectile->DamageEffectSpceHandle = SpecHandle;
 
 		Projectile->FinishSpawning(SpawnTransform);

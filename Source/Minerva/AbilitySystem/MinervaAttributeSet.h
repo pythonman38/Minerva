@@ -120,6 +120,8 @@ public:
 protected:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 
+	void ShowFloatingText(const FEffectProperties& Props, float Damage) const;
+
 public:
 
 	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
@@ -192,4 +194,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "Vital Attributes")
 	FGameplayAttributeData Mana;
 	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, Mana);
+
+
+	// Meta Attributes
+	UPROPERTY(BlueprintReadOnly, Category = MetaAttributes)
+	FGameplayAttributeData IncomingDamage;
+	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, IncomingDamage);
 };

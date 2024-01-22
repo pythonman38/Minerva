@@ -9,6 +9,7 @@
 #include "MinervaCharacterBase.generated.h"
 
 class UAbilitySystemComponent;
+class UAnimMontage;
 class UAttributeSet;
 class UGameplayAbility;
 class UGameplayEffect;
@@ -20,6 +21,11 @@ class MINERVA_API AMinervaCharacterBase : public ACharacter, public IAbilitySyst
 
 public:
 	AMinervaCharacterBase();
+
+	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void MulticastHandleDeath();
 
 protected:
 	virtual void BeginPlay() override;
@@ -33,6 +39,14 @@ protected:
 	void AddCharacterAbilities();
 
 	virtual FVector GetCombatSocketLocation() override;
+
+	void Dissolve();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartDissolveTimeline(UMaterialInstanceDynamic* DynamicMaterialInstance);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartWeaponDissolveTimeline(UMaterialInstanceDynamic* DynamicMaterialInstance);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
@@ -56,9 +70,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attributes)
 	TSubclassOf<UGameplayEffect> DefaultVitalAttributes;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	TObjectPtr<UMaterialInstance> DissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = true))
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = true))
+	TObjectPtr<UAnimMontage> HitReactMontage;
 
 public:
 	// Inherited via IAbilitySystemInterface
@@ -66,4 +89,7 @@ public:
 
 	// Getters for private variables
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
+
+	// Inherited via ICombatInterface
+	virtual void Die() override;
 };

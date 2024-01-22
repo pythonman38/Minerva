@@ -8,6 +8,7 @@
 #include "MinervaPlayerController.generated.h"
 
 class IEnemyInterface;
+class UDamageTextComponent;
 class UInputAction;
 class UInputMappingContext;
 class UMinervaAbilitySystemComponent;
@@ -25,6 +26,9 @@ public:
 	AMinervaPlayerController();
 
 	void PlayerTick(float DeltaTime) override;
+
+	UFUNCTION(Client, Reliable)
+	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter);
 
 protected:
 	virtual void BeginPlay() override;
@@ -84,4 +88,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	TObjectPtr<USplineComponent> Spline;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = true))
+	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
 };

@@ -6,7 +6,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Components/SplineComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/Character.h"
 #include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
+#include "Minerva/HUD/DamageTextComponent.h"
 #include "Minerva/Input/MinervaInputComponent.h"
 #include "Minerva/Interaction/EnemyInterface.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
@@ -34,6 +36,18 @@ void AMinervaPlayerController::PlayerTick(float DeltaTime)
 	CursorTrace();
 
 	AutoRun();
+}
+
+void AMinervaPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter)
+{
+	if (IsValid(TargetCharacter) && DamageTextComponentClass)
+	{
+		auto DamageText = NewObject<UDamageTextComponent>(TargetCharacter, DamageTextComponentClass);
+		DamageText->RegisterComponent();
+		DamageText->AttachToComponent(TargetCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		DamageText->SetDamageText(DamageAmount);
+	}
 }
 
 void AMinervaPlayerController::AutoRun()
