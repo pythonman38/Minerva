@@ -110,6 +110,19 @@ public:
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
 
+	// Resistance Attributes
+	UFUNCTION()
+	void OnRep_FireResistance(const FGameplayAttributeData& OldFireResistance) const;
+
+	UFUNCTION()
+	void OnRep_LightningResistance(const FGameplayAttributeData& OldLightningResistance) const;
+
+	UFUNCTION()
+	void OnRep_ArcaneResistance(const FGameplayAttributeData& OldArcaneResistance) const;
+
+	UFUNCTION()
+	void OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const;
+
 	// Vital Attributes
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
@@ -120,7 +133,7 @@ public:
 protected:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 
-	void ShowFloatingText(const FEffectProperties& Props, float Damage) const;
+	void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalhit) const;
 
 public:
 
@@ -185,6 +198,22 @@ public:
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, MaxMana);
 
+	// Reistance Attributes
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_FireResistance, Category = "Resistance Attributes")
+	FGameplayAttributeData FireResistance;
+	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, FireResistance);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_LightningResistance, Category = "Resistance Attributes")
+	FGameplayAttributeData LightningResistance;
+	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, LightningResistance);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_ArcaneResistance, Category = "Resistance Attributes")
+	FGameplayAttributeData ArcaneResistance;
+	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, ArcaneResistance);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_PhysicalResistance, Category = "Resistance Attributes")
+	FGameplayAttributeData PhysicalResistance;
+	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, PhysicalResistance);
 
 	// Vital Attributes
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes")

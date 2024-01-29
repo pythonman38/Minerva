@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Minerva/AbilitySystem/MinervaAbilityTypes.h"
 #include "Minerva/Game/MinervaGameModeBase.h"
 #include "Minerva/HUD/Minerva_HUD.h"
 #include "Minerva/HUD/MinervaWidgetController.h"
@@ -83,4 +84,40 @@ UCharacterClassInfo* UMinervaAbilitySystemLibrary::GetCharacterClassInfo(const U
 		return MinervaGameMode->CharacterClassInfo;
 	}
 	else return nullptr;
+}
+
+bool UMinervaAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const auto MinervaEffectContext = static_cast<const FMinervaGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return MinervaEffectContext->IsBlockedHit();
+	}
+
+	return false;
+}
+
+bool UMinervaAbilitySystemLibrary::IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const auto MinervaEffectContext = static_cast<const FMinervaGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return MinervaEffectContext->IsCriticalHit();
+	}
+
+	return false;
+}
+
+void UMinervaAbilitySystemLibrary::SetIsCriticalHit(UPARAM(ref)FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit)
+{
+	if (auto MinervaEffectContext = static_cast<FMinervaGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		MinervaEffectContext->SetIsCriticalHit(bInIsCriticalHit);
+	}
+}
+
+void UMinervaAbilitySystemLibrary::SetIsBlockedHit(UPARAM(ref)FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit)
+{
+	if (auto MinervaEffectContext = static_cast<FMinervaGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		MinervaEffectContext->SetIsBlockedHit(bInIsBlockedHit);
+	}
 }

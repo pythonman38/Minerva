@@ -68,6 +68,9 @@ protected:
 	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attributes)
+	TSubclassOf<UGameplayEffect> DefaultResistanceAttributes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attributes)
 	TSubclassOf<UGameplayEffect> DefaultVitalAttributes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)

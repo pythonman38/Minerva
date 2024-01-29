@@ -96,10 +96,13 @@ void AMinervaEnemy::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UMinervaAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
-	InitializeDefaultAttributes();
+	if (HasAuthority())
+	{
+		InitializeDefaultAttributes();
 
-	UMinervaAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
-
+		UMinervaAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+	}
+	
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 

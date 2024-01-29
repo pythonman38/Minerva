@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MinervaGameplayAbility.h"
+#include "MinervaDamageGameplayAbility.h"
 #include "MinervaProjectileSpell.generated.h"
 
 class AMinervaProjectile;
 class UGameplayEffect;
 
 UCLASS()
-class MINERVA_API UMinervaProjectileSpell : public UMinervaGameplayAbility
+class MINERVA_API UMinervaProjectileSpell : public UMinervaDamageGameplayAbility
 {
 	GENERATED_BODY()
 	
@@ -24,7 +24,4 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = true))
 	TSubclassOf<AMinervaProjectile> ProjectileClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = true))
-	TSubclassOf<UGameplayEffect> DamageEffectClass;
 };

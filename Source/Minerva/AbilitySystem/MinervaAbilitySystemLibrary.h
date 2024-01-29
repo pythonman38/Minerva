@@ -31,4 +31,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MinervaAbilitySystemLibrary|CharacterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintPure, Category = "MinervaAbilitySystemLibrary|GameplayEffects")
+	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintPure, Category = "MinervaAbilitySystemLibrary|GameplayEffects")
+	static bool IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintCallable, Category = "MinervaAbilitySystemLibrary|GameplayEffects")
+	static void SetIsBlockedHit(UPARAM(ref)FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit);
+
+	UFUNCTION(BlueprintCallable, Category = "MinervaAbilitySystemLibrary|GameplayEffects")
+	static void SetIsCriticalHit(UPARAM(ref)FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit);
 };

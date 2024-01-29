@@ -62,10 +62,14 @@ void AMinervaProjectile::SetFireboltProperties()
 
 void AMinervaProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (ImpactSound) UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-	if (ImpactEffect) UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-	if (LoopingSound) LoopingSoundComponent->Stop();
-
+	if (DamageEffectSpceHandle.Data.IsValid() && DamageEffectSpceHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor) return;
+	if (!bHit)
+	{
+		if (ImpactSound) UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+		if (ImpactEffect) UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		if (LoopingSound) LoopingSoundComponent->Stop();
+	}
+	
 	if (HasAuthority())
 	{
 		if (auto TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))

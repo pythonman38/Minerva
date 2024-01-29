@@ -38,15 +38,15 @@ void AMinervaPlayerController::PlayerTick(float DeltaTime)
 	AutoRun();
 }
 
-void AMinervaPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter)
+void AMinervaPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter, bool bBlockedHit, bool bCriticalhit)
 {
-	if (IsValid(TargetCharacter) && DamageTextComponentClass)
+	if (IsValid(TargetCharacter) && DamageTextComponentClass && IsLocalController())
 	{
 		auto DamageText = NewObject<UDamageTextComponent>(TargetCharacter, DamageTextComponentClass);
 		DamageText->RegisterComponent();
 		DamageText->AttachToComponent(TargetCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		DamageText->SetDamageText(DamageAmount);
+		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalhit);
 	}
 }
 

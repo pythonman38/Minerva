@@ -24,7 +24,6 @@ void UMinervaProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLoc
 	{
 		const auto SocketLocation = CombatInterface->GetCombatSocketLocation();
 		auto Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
-		Rotation.Pitch = 0.f;
 
 		FTransform SpawnTransform;
 		SpawnTransform.SetLocation(SocketLocation);
@@ -36,8 +35,13 @@ void UMinervaProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLoc
 		const auto SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
 
 		const auto GameplayTags = FMinervaGameplayTags::Get();
-		const auto ScaledDamage = Damage.GetValueAtLevel(10);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, ScaledDamage);
+
+		for (auto& Pair : DamageTypes)
+		{
+			const auto ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDamage);
+		}
+		
 		Projectile->DamageEffectSpceHandle = SpecHandle;
 
 		Projectile->FinishSpawning(SpawnTransform);

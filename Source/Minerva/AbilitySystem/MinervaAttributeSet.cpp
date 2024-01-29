@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayEffectExtension.h"
 #include "Kismet/GameplayStatics.h"
+#include "Minerva/AbilitySystem/MinervaAbilitySystemLibrary.h"
 #include "Minerva/Interaction/CombatInterface.h"
 #include "Minerva/Player/MinervaPlayerController.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
@@ -33,6 +34,12 @@ UMinervaAttributeSet::UMinervaAttributeSet()
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_ManaRegeneration, GetManaRegenerationAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_MaxHealth, GetMaxHealthAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_MaxMana, GetMaxManaAttribute);
+
+	/* Resistance Attributes */
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Fire, GetFireResistanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Lightning, GetLightningResistanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Arcane, GetArcaneResistanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Physical, GetPhysicalResistanceAttribute);
 }
 
 void UMinervaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -56,6 +63,12 @@ void UMinervaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME_CONDITION_NOTIFY(UMinervaAttributeSet, ManaRegeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UMinervaAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UMinervaAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
+
+	/* Resistance Attributes*/
+	DOREPLIFETIME_CONDITION_NOTIFY(UMinervaAttributeSet, FireResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UMinervaAttributeSet, LightningResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UMinervaAttributeSet, ArcaneResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UMinervaAttributeSet, PhysicalResistance, COND_None, REPNOTIFY_Always);
 
 	/* Vital Attributes */
 	DOREPLIFETIME_CONDITION_NOTIFY(UMinervaAttributeSet, Health, COND_None, REPNOTIFY_Always);
@@ -107,7 +120,9 @@ void UMinervaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCal
 				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 			}
 
-			ShowFloatingText(Props, LocalIncomingDamage);
+			const bool bBlock = UMinervaAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
+			const bool bCriticalHit = UMinervaAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+			ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
 		}
 	}
 }
@@ -192,6 +207,26 @@ void UMinervaAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMan
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UMinervaAttributeSet, MaxMana, OldMaxMana);
 }
 
+void UMinervaAttributeSet::OnRep_FireResistance(const FGameplayAttributeData& OldFireResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UMinervaAttributeSet, FireResistance, OldFireResistance);
+}
+
+void UMinervaAttributeSet::OnRep_LightningResistance(const FGameplayAttributeData& OldLightningResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UMinervaAttributeSet, LightningResistance, OldLightningResistance);
+}
+
+void UMinervaAttributeSet::OnRep_ArcaneResistance(const FGameplayAttributeData& OldArcaneResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UMinervaAttributeSet, ArcaneResistance, OldArcaneResistance);
+}
+
+void UMinervaAttributeSet::OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UMinervaAttributeSet, PhysicalResistance, OldPhysicalResistance);
+}
+
 void UMinervaAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
 {
 	// Source = causer of the effect, Target = target of the effect (owner of this AS)
@@ -219,13 +254,13 @@ void UMinervaAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackD
 	}
 }
 
-void UMinervaAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage) const
+void UMinervaAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalhit) const
 {
 	if (Props.SourceCharacter != Props.TargetCharacter)
 	{
-		if (auto PC = Cast<AMinervaPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0)))
+		if (auto PC = Cast<AMinervaPlayerController>(Props.SourceCharacter->Controller))
 		{
-			PC->ShowDamageNumber(Damage, Props.TargetCharacter);
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalhit);
 		}
 	}
 }
