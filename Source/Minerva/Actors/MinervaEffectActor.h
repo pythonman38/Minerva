@@ -53,7 +53,10 @@ private:
 	float ActorLevel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = true))
-	bool bDestroyOnEffectRemoval;
+	bool bDestroyOnEffectApplication;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = true))
+	bool bApplyEffectsToEnemies;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects", meta = (AllowPrivateAccess = true))
 	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass;

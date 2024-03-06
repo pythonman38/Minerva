@@ -3,11 +3,14 @@
 
 #include "MinervaEnemy.h"
 
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
 #include "Minerva/AbilitySystem/MinervaAttributeSet.h"
 #include "Minerva/AbilitySystem/MinervaAbilitySystemLibrary.h"
+#include "Minerva/AI/MinervaAIController.h"
 #include "Minerva/HUD/MinervaUserWidget.h"
 #include "Minerva/Minerva.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
@@ -25,10 +28,28 @@ AMinervaEnemy::AMinervaEnemy() :
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+
 	AttributeSet = CreateDefaultSubobject<UMinervaAttributeSet>("AttributeSet");
 
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
+}
+
+void AMinervaEnemy::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (!HasAuthority()) return;
+	MinervaAIController = Cast<AMinervaAIController>(NewController);
+
+	MinervaAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+	MinervaAIController->RunBehaviorTree(BehaviorTree);
+	MinervaAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
+	MinervaAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), CharacterClass != ECharacterClass::Warrior);
 }
 
 void AMinervaEnemy::HighlightActor()
@@ -62,6 +83,7 @@ void AMinervaEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 New
 {
 	bHitReacting = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
+	MinervaAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
 }
 
 void AMinervaEnemy::BeginPlay()

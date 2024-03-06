@@ -13,7 +13,8 @@ AMinervaEffectActor::AMinervaEffectActor() :
 	DurationEffectApplicationPolicy(EEffectApplicationPolicy::DoNotApply),
 	InfiniteEffectApplicationPolicy(EEffectApplicationPolicy::DoNotApply),
 	InfiniteEffectRemovalPolicy(EEffectRemovalPolicy::RemoveOnEndOverlap),
-	bDestroyOnEffectRemoval(false)
+	bDestroyOnEffectApplication(false),
+	bApplyEffectsToEnemies(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -29,6 +30,7 @@ void AMinervaEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<U
 {
 	if (auto ASCInterface = Cast<IAbilitySystemInterface>(TargetActor))
 	{
+		if (TargetActor->ActorHasTag(FName("Enemy")) && !bApplyEffectsToEnemies) return;
 		auto TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 		if (TargetASC == nullptr) return;
 
@@ -42,11 +44,14 @@ void AMinervaEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<U
 		{
 			if (InfiniteEffectRemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap) ActiveEffectHandles.Add(ActiveEffectHandle, TargetASC);
 		}
+		else Destroy();
+	
 	}
 }
 
 void AMinervaEffectActor::OnBeginOverlap(AActor* TargetActor)
 {
+	if (TargetActor->ActorHasTag(FName("Enemy")) && !bApplyEffectsToEnemies) return;
 	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnBeginOverlap) ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
 	if (DurationEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnBeginOverlap) ApplyEffectToTarget(TargetActor, DurationGameplayEffectClass);
 	if (InfiniteEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnBeginOverlap) ApplyEffectToTarget(TargetActor, InfiniteGameplayEffectClass);
@@ -54,6 +59,7 @@ void AMinervaEffectActor::OnBeginOverlap(AActor* TargetActor)
 
 void AMinervaEffectActor::OnEndOverlap(AActor* TargetActor)
 {
+	if (TargetActor->ActorHasTag(FName("Enemy")) && !bApplyEffectsToEnemies) return;
 	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap) ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
 	if (DurationEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap) ApplyEffectToTarget(TargetActor, DurationGameplayEffectClass);
 	if (InfiniteEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap) ApplyEffectToTarget(TargetActor, InfiniteGameplayEffectClass);

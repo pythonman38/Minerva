@@ -9,6 +9,8 @@
 #include "Minerva/AbilitySystem/CharacterClassInfo.h"
 #include "MinervaEnemy.generated.h"
 
+class AMinervaAIController;
+class UBehaviorTree;
 class UWidgetComponent;
 
 UCLASS()
@@ -18,6 +20,8 @@ class MINERVA_API AMinervaEnemy : public AMinervaCharacterBase, public IEnemyInt
 	
 public:
 	AMinervaEnemy();
+
+	virtual void PossessedBy(AController* NewController) override;
 
 	// Inherited via IEnemyInterface
 	void HighlightActor() override;
@@ -58,4 +62,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widgets, meta = (AllowPrivateAccess = true))
 	TObjectPtr<UWidgetComponent> HealthBar;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = true))
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+
+	UPROPERTY(BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = true))
+	TObjectPtr<AMinervaAIController> MinervaAIController;
 };
