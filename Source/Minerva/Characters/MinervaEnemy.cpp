@@ -67,6 +67,16 @@ void AMinervaEnemy::UnHighlightActor()
 	Weapon->SetRenderCustomDepth(false);
 }
 
+void AMinervaEnemy::SetCombatTarget_Implementation(AActor* InCombatTarget)
+{
+	CombatTarget = InCombatTarget;
+}
+
+AActor* AMinervaEnemy::GetCombatTarget_Implementation() const
+{
+	return CombatTarget;
+}
+
 int32 AMinervaEnemy::GetPlayerLevel()
 {
 	return Level;
@@ -83,7 +93,10 @@ void AMinervaEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 New
 {
 	bHitReacting = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
-	MinervaAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	if (MinervaAIController && MinervaAIController->GetBlackboardComponent())
+	{
+		MinervaAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	}
 }
 
 void AMinervaEnemy::BeginPlay()
@@ -122,7 +135,7 @@ void AMinervaEnemy::InitAbilityActorInfo()
 	{
 		InitializeDefaultAttributes();
 
-		UMinervaAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+		UMinervaAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent, CharacterClass);
 	}
 	
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;

@@ -38,7 +38,13 @@ protected:
 
 	void AddCharacterAbilities();
 
-	virtual FVector GetCombatSocketLocation() override;
+	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag);
+
+	virtual bool IsDead_Implementation() const;
+
+	virtual AActor* GetAvatar_Implementation();
+
+	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation();
 
 	void Dissolve();
 
@@ -49,11 +55,19 @@ protected:
 	void StartWeaponDissolveTimeline(UMaterialInstanceDynamic* DynamicMaterialInstance);
 
 protected:
+	bool bDead;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	FName WeaponTipSocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	FName LeftHandSocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	FName RightHandSocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability System")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -78,6 +92,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	TArray<FTaggedMontage> AttackMontages;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = true))

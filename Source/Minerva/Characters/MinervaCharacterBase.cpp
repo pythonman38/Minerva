@@ -7,7 +7,8 @@
 #include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
 #include "Minerva/Minerva.h"
 
-AMinervaCharacterBase::AMinervaCharacterBase()
+AMinervaCharacterBase::AMinervaCharacterBase() :
+	bDead(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -28,10 +29,13 @@ UAnimMontage* AMinervaCharacterBase::GetHitReactMontage_Implementation()
 
 void AMinervaCharacterBase::MulticastHandleDeath_Implementation()
 {
-	Weapon->SetSimulatePhysics(true);
-	Weapon->SetEnableGravity(true);
-	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-
+	if (Weapon)
+	{
+		Weapon->SetSimulatePhysics(true);
+		Weapon->SetEnableGravity(true);
+		Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	}
+	
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
@@ -39,6 +43,8 @@ void AMinervaCharacterBase::MulticastHandleDeath_Implementation()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
+
+	bDead = true;
 }
 
 void AMinervaCharacterBase::BeginPlay()
@@ -75,10 +81,38 @@ void AMinervaCharacterBase::AddCharacterAbilities()
 	MinervaASC->AddCharacterAbilities(StartupAbilities);
 }
 
-FVector AMinervaCharacterBase::GetCombatSocketLocation()
+FVector AMinervaCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag)
 {
-	check(Weapon);
-	return Weapon->GetSocketLocation(WeaponTipSocketName);
+	const auto& GameplayTags = FMinervaGameplayTags::Get();
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_Weapon) && IsValid(Weapon))
+	{
+		return Weapon->GetSocketLocation(WeaponTipSocketName);
+	}
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_LeftHand))
+	{
+		return GetMesh()->GetSocketLocation(LeftHandSocketName);
+	}
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_RightHand))
+	{
+		return GetMesh()->GetSocketLocation(RightHandSocketName);
+	}
+
+	return FVector();
+}
+
+bool AMinervaCharacterBase::IsDead_Implementation() const
+{
+	return bDead;
+}
+
+AActor* AMinervaCharacterBase::GetAvatar_Implementation()
+{
+	return this;
+}
+
+TArray<FTaggedMontage> AMinervaCharacterBase::GetAttackMontages_Implementation()
+{
+	return AttackMontages;
 }
 
 void AMinervaCharacterBase::Dissolve()
@@ -92,7 +126,7 @@ void AMinervaCharacterBase::Dissolve()
 	if (IsValid(WeaponDissolveMaterialInstance))
 	{
 		auto DynamicMatInst = UMaterialInstanceDynamic::Create(WeaponDissolveMaterialInstance, this);
-		Weapon->SetMaterial(0, DynamicMatInst);
+		if (Weapon) Weapon->SetMaterial(0, DynamicMatInst);
 		StartWeaponDissolveTimeline(DynamicMatInst);
 	}
 }
@@ -104,6 +138,6 @@ UAbilitySystemComponent* AMinervaCharacterBase::GetAbilitySystemComponent() cons
 
 void AMinervaCharacterBase::Die()
 {
-	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	if (Weapon) Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 	MulticastHandleDeath();
 }

@@ -26,6 +26,8 @@ public:
 	// Inherited via IEnemyInterface
 	void HighlightActor() override;
 	void UnHighlightActor() override;
+	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget);
+	virtual AActor* GetCombatTarget_Implementation() const;
 
 	// Inherited via ICombatInterface
 	virtual int32 GetPlayerLevel() override;
@@ -42,6 +44,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnMaxHealthChanged;
 
+	UPROPERTY(BlueprintReadWrite, Category = Combat)
+	TObjectPtr<AActor> CombatTarget;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -52,7 +57,11 @@ protected:
 	virtual void InitializeDefaultAttributes() const override;
 
 private:
-	float BaseWalkSpeed, LifeSpan;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = true))
+	float BaseWalkSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = true))
+	float LifeSpan;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults", meta = (AllowPrivateAccess = true))
 	int32 Level;

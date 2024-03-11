@@ -261,6 +261,11 @@ void UMinervaAttributeSet::ShowFloatingText(const FEffectProperties& Props, floa
 		if (auto PC = Cast<AMinervaPlayerController>(Props.SourceCharacter->Controller))
 		{
 			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalhit);
+			return;
+		}
+		if (auto PC = Cast<AMinervaPlayerController>(Props.TargetCharacter->Controller))
+		{
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalhit);
 		}
 	}
 }
