@@ -86,6 +86,8 @@ void AMinervaEnemy::Die()
 {
 	SetLifeSpan(LifeSpan);
 
+	if (MinervaAIController) MinervaAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsDead"), true);
+
 	Super::Die();
 }
 

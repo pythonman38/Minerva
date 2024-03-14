@@ -63,9 +63,8 @@ void AMinervaProjectile::SetFireboltProperties()
 
 void AMinervaProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	auto EffectCauser = DamageEffectSpceHandle.Data.Get()->GetContext().GetEffectCauser();
-	if (DamageEffectSpceHandle.Data.IsValid() && EffectCauser == OtherActor) return;
-	if (!UMinervaAbilitySystemLibrary::IsNotFriend(EffectCauser, OtherActor)) return;
+	if (!DamageEffectSpceHandle.Data.IsValid() || DamageEffectSpceHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor) return;
+	if (!UMinervaAbilitySystemLibrary::IsNotFriend(DamageEffectSpceHandle.Data.Get()->GetContext().GetEffectCauser(), OtherActor)) return;
 	if (!bHit)
 	{
 		if (ImpactSound) UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
