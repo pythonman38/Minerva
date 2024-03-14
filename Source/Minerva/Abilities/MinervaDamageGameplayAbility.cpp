@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Minerva/Interaction/CombatInterface.h"
 
 void UMinervaDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
@@ -16,4 +17,15 @@ void UMinervaDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 	}
 	auto TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DamageSpecHandle.Data.Get(), TargetASC);
+}
+
+FTaggedMontage UMinervaDamageGameplayAbility::GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const
+{
+	if (TaggedMontages.Num() > 0)
+	{
+		const int32 Selection = FMath::RandRange(0, TaggedMontages.Num() - 1);
+		return TaggedMontages[Selection];
+	}
+
+	return FTaggedMontage();
 }

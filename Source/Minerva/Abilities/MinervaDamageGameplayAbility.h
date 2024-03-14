@@ -6,6 +6,7 @@
 #include "MinervaGameplayAbility.h"
 #include "MinervaDamageGameplayAbility.generated.h"
 
+struct FTaggedMontage;
 
 UCLASS()
 class MINERVA_API UMinervaDamageGameplayAbility : public UMinervaGameplayAbility
@@ -15,6 +16,9 @@ class MINERVA_API UMinervaDamageGameplayAbility : public UMinervaGameplayAbility
 public:
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* TargetActor);
+
+	UFUNCTION(BlueprintPure)
+	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Projectile)

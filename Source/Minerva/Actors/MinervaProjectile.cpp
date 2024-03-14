@@ -9,6 +9,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Minerva/AbilitySystem/MinervaAbilitySystemLibrary.h"
 #include "Minerva/Minerva.h"
 #include "NiagaraFunctionLibrary.h"
 
@@ -62,7 +63,9 @@ void AMinervaProjectile::SetFireboltProperties()
 
 void AMinervaProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (DamageEffectSpceHandle.Data.IsValid() && DamageEffectSpceHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor) return;
+	auto EffectCauser = DamageEffectSpceHandle.Data.Get()->GetContext().GetEffectCauser();
+	if (DamageEffectSpceHandle.Data.IsValid() && EffectCauser == OtherActor) return;
+	if (!UMinervaAbilitySystemLibrary::IsNotFriend(EffectCauser, OtherActor)) return;
 	if (!bHit)
 	{
 		if (ImpactSound) UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
