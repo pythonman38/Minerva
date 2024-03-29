@@ -42,6 +42,7 @@ void AMinervaProjectile::Destroyed()
 		if (ImpactSound) UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		if (ImpactEffect) UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 		if (LoopingSound) LoopingSoundComponent->Stop();
+		bHit = true;
 	}
 
 	Super::Destroyed();
@@ -70,6 +71,7 @@ void AMinervaProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCom
 		if (ImpactSound) UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		if (ImpactEffect) UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 		if (LoopingSound) LoopingSoundComponent->Stop();
+		bHit = true;
 	}
 	
 	if (HasAuthority())

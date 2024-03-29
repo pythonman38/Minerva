@@ -4,11 +4,13 @@
 #include "MinervaCharacterBase.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
 #include "Minerva/Minerva.h"
 
 AMinervaCharacterBase::AMinervaCharacterBase() :
-	bDead(false)
+	bDead(false),
+	MinionCount(0)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -35,6 +37,8 @@ void AMinervaCharacterBase::MulticastHandleDeath_Implementation()
 		Weapon->SetEnableGravity(true);
 		Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	}
+
+	if (DeathSound) UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
 	
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetEnableGravity(true);
@@ -84,17 +88,21 @@ void AMinervaCharacterBase::AddCharacterAbilities()
 FVector AMinervaCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag)
 {
 	const auto& GameplayTags = FMinervaGameplayTags::Get();
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_Weapon) && IsValid(Weapon))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_Weapon) && IsValid(Weapon))
 	{
 		return Weapon->GetSocketLocation(WeaponTipSocketName);
 	}
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_LeftHand))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_LeftHand))
 	{
 		return GetMesh()->GetSocketLocation(LeftHandSocketName);
 	}
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_RightHand))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_RightHand))
 	{
 		return GetMesh()->GetSocketLocation(RightHandSocketName);
+	}
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_Tail))
+	{
+		return GetMesh()->GetSocketLocation(TailSocketName);
 	}
 
 	return FVector();
@@ -113,6 +121,36 @@ AActor* AMinervaCharacterBase::GetAvatar_Implementation()
 TArray<FTaggedMontage> AMinervaCharacterBase::GetAttackMontages_Implementation()
 {
 	return AttackMontages;
+}
+
+UNiagaraSystem* AMinervaCharacterBase::GetBloodEffect_Implementation()
+{
+	return BloodEffect;
+}
+
+FTaggedMontage AMinervaCharacterBase::GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag)
+{
+	for (FTaggedMontage TaggedMontage : AttackMontages)
+	{
+		if (TaggedMontage.MontageTag == MontageTag) return TaggedMontage;
+	}
+
+	return FTaggedMontage();
+}
+
+int32 AMinervaCharacterBase::GetMinionCount_Implementation()
+{
+	return MinionCount;
+}
+
+void AMinervaCharacterBase::IncrementMinionCount_Implementation(int32 Amount)
+{
+	MinionCount += Amount;
+}
+
+void AMinervaCharacterBase::DecrementMinionCount_Implementation(int32 Amount)
+{
+	MinionCount -= Amount;
 }
 
 void AMinervaCharacterBase::Dissolve()

@@ -8,6 +8,7 @@
 
 class AMinervaProjectile;
 class UGameplayEffect;
+struct FGameplayTag;
 
 UCLASS()
 class MINERVA_API UMinervaProjectileSpell : public UMinervaDamageGameplayAbility
@@ -19,7 +20,7 @@ protected:
 		const FGameplayEventData* TriggerEventData);
 
 	UFUNCTION(BlueprintCallable, Category = Projectile)
-	void SpawnProjectile(const FVector& ProjectileTargetLocation);
+	void SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag, bool bOverridePitch = false, float PitchOverride = 0);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = true))

@@ -13,6 +13,7 @@ class UAnimMontage;
 class UAttributeSet;
 class UGameplayAbility;
 class UGameplayEffect;
+class UNiagaraSystem;
 
 UCLASS(Abstract)
 class MINERVA_API AMinervaCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
@@ -38,13 +39,23 @@ protected:
 
 	void AddCharacterAbilities();
 
-	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag);
+	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) override;
 
-	virtual bool IsDead_Implementation() const;
+	virtual bool IsDead_Implementation() const override;
 
-	virtual AActor* GetAvatar_Implementation();
+	virtual AActor* GetAvatar_Implementation() override;
 
-	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation();
+	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() override;
+
+	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
+
+	virtual FTaggedMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
+
+	virtual int32 GetMinionCount_Implementation() override;
+
+	virtual void IncrementMinionCount_Implementation(int32 Amount) override;
+
+	virtual void DecrementMinionCount_Implementation(int32 Amount) override;
 
 	void Dissolve();
 
@@ -57,6 +68,8 @@ protected:
 protected:
 	bool bDead;
 
+	int32 MinionCount;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
@@ -68,6 +81,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	FName RightHandSocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	FName TailSocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability System")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -95,6 +111,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	TArray<FTaggedMontage> AttackMontages;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	TObjectPtr<UNiagaraSystem> BloodEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	TObjectPtr<USoundBase> DeathSound;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = true))

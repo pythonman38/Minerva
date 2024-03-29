@@ -15,13 +15,14 @@ void UMinervaProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle H
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void UMinervaProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+void UMinervaProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag, bool bOverridePitch, float PitchOverride)
 {
 	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority();
 	if (!bIsServer) return;
 
-	const auto SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), FMinervaGameplayTags::Get().Montage_Attack_Weapon);
+	const auto SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), SocketTag);
 	auto Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
+	if (bOverridePitch) Rotation.Pitch = PitchOverride;
 
 	FTransform SpawnTransform;
 	SpawnTransform.SetLocation(SocketLocation);
