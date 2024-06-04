@@ -9,6 +9,8 @@
 #include "OverlayWidgetController.generated.h"
 
 class FOnAttributeChangedSignature;
+class UAbilityInfo;
+class UMinervaAbilitySystemComponent;
 class UMinervaUserWidget;
 
 struct FOnAttributeChangeData;
@@ -33,6 +35,7 @@ struct FUIWidgetRow : public FTableRowBase
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FMinervaAbilityInfo&, Info);
 
 UCLASS(BlueprintType, Blueprintable)
 class MINERVA_API UOverlayWidgetController : public UMinervaWidgetController
@@ -59,9 +62,17 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FMessageWidgetRowSignature MessageWidgetRowDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
+	FAbilityInfoSignature AbilityInfoDelegate;
+
 protected:
+	void OnInitializeStartupAbilities(UMinervaAbilitySystemComponent* MinervaAbilitySystemComponent);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = WidgetData)
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = WidgetData)
+	TObjectPtr<UAbilityInfo> AbilityInfo;
 
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);

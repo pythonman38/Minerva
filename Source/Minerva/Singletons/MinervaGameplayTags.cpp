@@ -62,6 +62,10 @@ void FMinervaGameplayTags::InitializeNativeGameplayTags()
 	/* Gameplay Abilities Tags */
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"), FString("Attack Ability Tag"));
 	GameplayTags.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Summon"), FString("Shamon Summon Ability Tag"));
+	GameplayTags.Abilities_Fire_Firebolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.Firebolt"), FString("Minerva Firebolt Ability Tag"));
+
+	/* Gameplay Cooldown Tags */
+	GameplayTags.Cooldown_Fire_Firebolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Fire.Firebolt"), FString("Minerva Firebolt Cooldown Tag"));
 
 	/* Combat Socket Tags */
 	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"), FString("Montage with Weapon Attack."));

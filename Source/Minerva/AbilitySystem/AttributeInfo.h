@@ -33,6 +33,6 @@ class MINERVA_API UAttributeInfo : public UDataAsset
 public:
 	FMinervaAttributeInfo FindAttributeInfoForTag(const FGameplayTag& AttributeTag, bool bLogNotFound = false) const;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AttributeInformation)
 	TArray<FMinervaAttributeInfo> AttributeInformation;
 };

@@ -3,6 +3,7 @@
 
 #include "MinervaAbilitySystemComponent.h"
 
+#include "Minerva/MinervaLogChannels.h"
 #include "Minerva/Abilities/MinervaGameplayAbility.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
 
@@ -22,6 +23,8 @@ void UMinervaAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclas
 			GiveAbility(AbilitySpec);
 		}
 	}
+	bStartupAbilitiesGiven = true;
+	AbilitiesGivenDelegate.Broadcast(this);
 }
 
 void UMinervaAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
@@ -45,6 +48,55 @@ void UMinervaAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag&
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag)) AbilitySpecInputReleased(AbilitySpec);
+	}
+}
+
+void UMinervaAbilitySystemComponent::ForEachAbility(const FForEachAbility& Delegate)
+{
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if (!Delegate.ExecuteIfBound(AbilitySpec))
+		{
+			UE_LOG(LogMinerva, Error, TEXT("Failed to execute delgate in %hs"), __FUNCTION__);
+		}
+	}
+}
+
+FGameplayTag UMinervaAbilitySystemComponent::GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (AbilitySpec.Ability)
+	{
+		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags)
+		{
+			if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities")))) return Tag;
+		}
+	}
+	
+	return FGameplayTag();
+}
+
+FGameplayTag UMinervaAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	for (FGameplayTag Tag : AbilitySpec.DynamicAbilityTags)
+	{
+		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("InputTag"))))
+		{
+			return Tag;
+		}
+	}
+
+	return FGameplayTag();
+}
+
+void UMinervaAbilitySystemComponent::OnRep_ActivateAbilities()
+{
+	Super::OnRep_ActivateAbilities();
+
+	if (!bStartupAbilitiesGiven)
+	{
+		bStartupAbilitiesGiven = true;
+		AbilitiesGivenDelegate.Broadcast(this);
 	}
 }
 

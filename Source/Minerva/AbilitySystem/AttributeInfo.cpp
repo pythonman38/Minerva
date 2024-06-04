@@ -2,6 +2,7 @@
 
 
 #include "AttributeInfo.h"
+#include "Minerva/MinervaLogChannels.h"
 
 FMinervaAttributeInfo UAttributeInfo::FindAttributeInfoForTag(const FGameplayTag& AttributeTag, bool bLogNotFound) const
 {
@@ -13,7 +14,7 @@ FMinervaAttributeInfo UAttributeInfo::FindAttributeInfoForTag(const FGameplayTag
         }
     }
 
-    if (bLogNotFound) UE_LOG(LogTemp, Error, TEXT("Can't find Info for Attribute Tag [%s] on AttributeInfo [%s]."), *AttributeTag.ToString(), *GetNameSafe(this));
+    if (bLogNotFound) UE_LOG(LogMinerva, Error, TEXT("Can't find Info for Attribute Tag [%s] on AttributeInfo [%s]."), *AttributeTag.ToString(), *GetNameSafe(this));
 
     return FMinervaAttributeInfo();
 }
