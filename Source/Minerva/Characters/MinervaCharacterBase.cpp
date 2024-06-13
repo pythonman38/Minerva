@@ -83,6 +83,7 @@ void AMinervaCharacterBase::AddCharacterAbilities()
 	auto MinervaASC = CastChecked<UMinervaAbilitySystemComponent>(AbilitySystemComponent);
 	if (!HasAuthority()) return;
 	MinervaASC->AddCharacterAbilities(StartupAbilities);
+	MinervaASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
 }
 
 FVector AMinervaCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag)
@@ -151,6 +152,11 @@ void AMinervaCharacterBase::IncrementMinionCount_Implementation(int32 Amount)
 void AMinervaCharacterBase::DecrementMinionCount_Implementation(int32 Amount)
 {
 	MinionCount -= Amount;
+}
+
+ECharacterClass AMinervaCharacterBase::GetCharacterClass_Implementation()
+{
+	return CharacterClass;
 }
 
 void AMinervaCharacterBase::Dissolve()

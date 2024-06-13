@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "Minerva/AbilitySystem/CharacterClassInfo.h"
 #include "Minerva/Interaction/CombatInterface.h"
 #include "MinervaCharacterBase.generated.h"
 
@@ -57,6 +58,8 @@ protected:
 
 	virtual void DecrementMinionCount_Implementation(int32 Amount) override;
 
+	virtual ECharacterClass GetCharacterClass_Implementation() override;
+
 	void Dissolve();
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -85,11 +88,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	FName TailSocketName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability System")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AbilitySystem)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability System")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AbilitySystem)
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CharacterClassDefaults, meta = (AllowPrivateAccess = true))
+	ECharacterClass CharacterClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attributes)
 	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
@@ -121,6 +127,9 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = true))
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = true))
+	TArray<TSubclassOf<UGameplayAbility>> StartupPassiveAbilities;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = true))
 	TObjectPtr<UAnimMontage> HitReactMontage;

@@ -3,14 +3,31 @@
 
 #include "MinervaCharacter.h"
 
+#include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Minerva/AbilitySystem/LevelUpInfo.h"
 #include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
 #include "Minerva/HUD/Minerva_HUD.h"
 #include "Minerva/Player/MinervaPlayerController.h"
 #include "Minerva/Player/MinervaPlayerState.h"
+#include "NiagaraComponent.h"
 
 AMinervaCharacter::AMinervaCharacter()
 {
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>("CameraBoom");
+	CameraBoom->SetupAttachment(GetRootComponent());
+	CameraBoom->SetUsingAbsoluteRotation(true);
+	CameraBoom->bDoCollisionTest = false;
+
+	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>("TopDownCameraComp");
+	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	TopDownCameraComponent->bUsePawnControlRotation = false;
+
+	LevelUpNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("LevelUpNiagaraComp");
+	LevelUpNiagaraComponent->SetupAttachment(GetRootComponent());
+	LevelUpNiagaraComponent->bAutoActivate = false;
+
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
 	GetCharacterMovement()->bConstrainToPlane = true;
@@ -19,6 +36,8 @@ AMinervaCharacter::AMinervaCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
+
+	CharacterClass = ECharacterClass::Elementalist;
 }
 
 void AMinervaCharacter::PossessedBy(AController* NewController)
@@ -38,11 +57,68 @@ void AMinervaCharacter::OnRep_PlayerState()
 	InitAbilityActorInfo();
 }
 
-int32 AMinervaCharacter::GetPlayerLevel()
+int32 AMinervaCharacter::GetPlayerLevel_Implementation()
 {
 	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
 	check(MinervaPlayerState);
 	return MinervaPlayerState->GetPlayerLevel();
+}
+
+void AMinervaCharacter::AddToXP_Implementation(int32 InXP)
+{
+	auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	MinervaPlayerState->AddToXP(InXP);
+}
+
+void AMinervaCharacter::AddToPlayerLevel_Implementation(int32 AmountToAdd)
+{
+	auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	MinervaPlayerState->AddToLevel(AmountToAdd);
+}
+
+void AMinervaCharacter::AddToAttributePoints_Implementation(int32 InAttributePoints)
+{
+	// TODO: Add AttributePoints to PlayerState
+}
+
+void AMinervaCharacter::AddToSpellPoints_Implementation(int32 InSpellPoints)
+{
+	// TODO: Add SpellPoints to PlayerState
+}
+
+void AMinervaCharacter::LevelUp_Implementation()
+{
+	MulticastLevelUpParticles();
+}
+
+int32 AMinervaCharacter::GetXP_Implementation()
+{
+	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	return MinervaPlayerState->GetXP();
+}
+
+int32 AMinervaCharacter::GetAttributePointsReward_Implementation(int32 Level)
+{
+	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	return MinervaPlayerState->LevelUpInfo->LevelUpInformation[Level].AttributePointAward;
+}
+
+int32 AMinervaCharacter::GetSpellPointsReward_Implementation(int32 Level)
+{
+	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	return MinervaPlayerState->LevelUpInfo->LevelUpInformation[Level].SpellPointAward;
+}
+
+int32 AMinervaCharacter::FindLevelForXP_Implementation(int32 InXP)
+{
+	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	return MinervaPlayerState->LevelUpInfo->FindLevelForXP(InXP);
 }
 
 void AMinervaCharacter::InitAbilityActorInfo()
@@ -60,4 +136,15 @@ void AMinervaCharacter::InitAbilityActorInfo()
 	}
 
 	InitializeDefaultAttributes();
+}
+
+void AMinervaCharacter::MulticastLevelUpParticles_Implementation() const
+{
+	if (IsValid(LevelUpNiagaraComponent))
+	{
+		const auto CameraLocation = TopDownCameraComponent->GetComponentLocation(), NiagaraSystemLocation = LevelUpNiagaraComponent->GetComponentLocation();
+		const auto ToCameraRotation = (CameraLocation - NiagaraSystemLocation).Rotation();
+		LevelUpNiagaraComponent->SetWorldRotation(ToCameraRotation);
+		LevelUpNiagaraComponent->Activate(true);
+	}
 }

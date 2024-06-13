@@ -81,9 +81,9 @@ void UMinervaAbilitySystemLibrary::GiveStartupAbilities(const UObject* WorldCont
 	const auto& DefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
 	for (auto AbilityClass : DefaultInfo.StartupAbilities)
 	{
-		if (auto CombatInterface = Cast<ICombatInterface>(ASC->GetAvatarActor()))
+		if (ASC->GetAvatarActor()->Implements<UCombatInterface>())
 		{
-			auto AbilitySpec = FGameplayAbilitySpec(AbilityClass, CombatInterface->GetPlayerLevel());
+			auto AbilitySpec = FGameplayAbilitySpec(AbilityClass, ICombatInterface::Execute_GetPlayerLevel(ASC->GetAvatarActor()));
 			ASC->GiveAbility(AbilitySpec);
 		}
 	}
@@ -151,6 +151,17 @@ bool UMinervaAbilitySystemLibrary::IsNotFriend(AActor* FirstActor, AActor* Secon
 	const bool bBothAreEnemies = FirstActor->ActorHasTag(FName("Enemy")) && SecondActor->ActorHasTag(FName("Enemy"));
 	const bool bFriends = bBothArePlayers || bBothAreEnemies;
 	return !bFriends;
+}
+
+int32 UMinervaAbilitySystemLibrary::GetXPRewardForClassAndLevel(const UObject* WorldContextObject, ECharacterClass CharacterClass, int32 CharacterLevel)
+{
+	auto CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if (CharacterClassInfo == nullptr) return 0;
+
+	auto Info = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
+	auto XPReward = Info.XP_Reward.GetValueAtLevel(CharacterLevel);
+
+	return static_cast<int32>(XPReward);
 }
 
 void UMinervaAbilitySystemLibrary::SetIsBlockedHit(UPARAM(ref)FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit)

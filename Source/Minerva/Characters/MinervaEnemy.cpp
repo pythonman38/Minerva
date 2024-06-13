@@ -17,7 +17,6 @@
 
 AMinervaEnemy::AMinervaEnemy() :
 	Level(1),
-	CharacterClass(ECharacterClass::Warrior),
 	bHitReacting(false),
 	BaseWalkSpeed(250.f),
 	LifeSpan(5.f)
@@ -37,6 +36,8 @@ AMinervaEnemy::AMinervaEnemy() :
 
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
+
+	CharacterClass = ECharacterClass::Warrior;
 }
 
 void AMinervaEnemy::PossessedBy(AController* NewController)
@@ -77,7 +78,7 @@ AActor* AMinervaEnemy::GetCombatTarget_Implementation() const
 	return CombatTarget;
 }
 
-int32 AMinervaEnemy::GetPlayerLevel()
+int32 AMinervaEnemy::GetPlayerLevel_Implementation()
 {
 	return Level;
 }

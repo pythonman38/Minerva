@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Minerva/AbilitySystem/CharacterClassInfo.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
 #include "CombatInterface.generated.h"
 
@@ -41,9 +42,10 @@ class MINERVA_API ICombatInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual int32 GetPlayerLevel();
-
 	virtual void Die() = 0;
+
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetPlayerLevel();
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateFacingTarget(const FVector& TargetLocation);
@@ -77,4 +79,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void DecrementMinionCount(int32 Amount);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	ECharacterClass GetCharacterClass();
 };

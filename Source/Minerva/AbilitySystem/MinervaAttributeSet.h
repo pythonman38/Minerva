@@ -135,6 +135,8 @@ protected:
 
 	void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalhit) const;
 
+	void SendXPEvent(const FEffectProperties& Props);
+
 public:
 
 	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
@@ -155,7 +157,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_Vigor, Category = "Primary Attributes")
 	FGameplayAttributeData Vigor;
 	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, Vigor);
-
 
 	// Secondary Attributes
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_Armor, Category = "Secondary Attributes")
@@ -224,9 +225,12 @@ public:
 	FGameplayAttributeData Mana;
 	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, Mana);
 
-
 	// Meta Attributes
 	UPROPERTY(BlueprintReadOnly, Category = MetaAttributes)
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, IncomingDamage);
+
+	UPROPERTY(BlueprintReadOnly, Category = MetaAttributes)
+	FGameplayAttributeData IncomingXP;
+	ATTRIBUTE_ACCESSORS(UMinervaAttributeSet, IncomingXP);
 };

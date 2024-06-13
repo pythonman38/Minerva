@@ -9,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Minerva/AbilitySystem/MinervaAbilitySystemLibrary.h"
 #include "Minerva/Interaction/CombatInterface.h"
+#include "Minerva/Interaction/PlayerInterface.h"
+#include "Minerva/MinervaLogChannels.h"
 #include "Minerva/Player/MinervaPlayerController.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
 #include "Net/UnrealNetwork.h"
@@ -91,11 +93,7 @@ void UMinervaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCal
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 
-	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
-	{
-		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
-		UE_LOG(LogTemp, Warning, TEXT("Changed Health on %s, Health: %f."), *Props.TargetAvatarActor->GetName(), GetHealth());
-	}
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute()) SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
 	if (Data.EvaluatedData.Attribute == GetManaAttribute()) SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
@@ -108,10 +106,8 @@ void UMinervaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCal
 
 			if (const bool bFatal = NewHealth <= 0.f)
 			{
-				if (auto CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
-				{
-					CombatInterface->Die();
-				}
+				if (auto CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor)) CombatInterface->Die();
+				SendXPEvent(Props);
 			}
 			else
 			{
@@ -123,6 +119,36 @@ void UMinervaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCal
 			const bool bBlock = UMinervaAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 			const bool bCriticalHit = UMinervaAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
 			ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
+		}
+	}
+	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
+	{
+		const float LocalIncomingXP = GetIncomingXP();
+		SetIncomingXP(0.f);
+
+		// Source Character is the owner, since GA_ListenForEvents applies GE_EventBasedEffect, adding to IncomingXP
+		if (Props.SourceCharacter->Implements<UPlayerInterface>() && Props.SourceCharacter->Implements<UCombatInterface>())
+		{
+			const auto CurrentLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceCharacter);
+			const auto CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceCharacter);
+			const auto NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceCharacter, CurrentXP + LocalIncomingXP);
+			const int32 NumLevelUps = NewLevel - CurrentLevel;
+			if (NumLevelUps > 0)
+			{
+				const auto AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
+				const auto SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
+
+				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumLevelUps);
+				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
+				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
+				
+				SetHealth(GetMaxHealth());
+				SetMana(GetMaxMana());
+
+				IPlayerInterface::Execute_LevelUp(Props.SourceCharacter);
+			}
+
+			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
 		}
 	}
 }
@@ -267,5 +293,21 @@ void UMinervaAttributeSet::ShowFloatingText(const FEffectProperties& Props, floa
 		{
 			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalhit);
 		}
+	}
+}
+
+void UMinervaAttributeSet::SendXPEvent(const FEffectProperties& Props)
+{
+	if (Props.TargetCharacter->Implements<UCombatInterface>())
+	{
+		const auto TargetLevel = ICombatInterface::Execute_GetPlayerLevel(Props.TargetCharacter);
+		const auto TargetClass = ICombatInterface::Execute_GetCharacterClass(Props.TargetCharacter);
+		const auto XPReward = UMinervaAbilitySystemLibrary::GetXPRewardForClassAndLevel(Props.TargetCharacter, TargetClass, TargetLevel);
+		const auto& GameplayTags = FMinervaGameplayTags::Get();
+		FGameplayEventData Payload;
+		Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXP;
+		Payload.EventMagnitude = XPReward;
+
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, Payload.EventTag, Payload);
 	}
 }

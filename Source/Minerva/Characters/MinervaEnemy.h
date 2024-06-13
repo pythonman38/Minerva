@@ -6,7 +6,6 @@
 #include "MinervaCharacterBase.h"
 #include "Minerva/Interaction/EnemyInterface.h"
 #include "Minerva/HUD/OverlayWidgetController.h"
-#include "Minerva/AbilitySystem/CharacterClassInfo.h"
 #include "MinervaEnemy.generated.h"
 
 class AMinervaAIController;
@@ -30,7 +29,7 @@ public:
 	virtual AActor* GetCombatTarget_Implementation() const;
 
 	// Inherited via ICombatInterface
-	virtual int32 GetPlayerLevel() override;
+	virtual int32 GetPlayerLevel_Implementation() override;
 	virtual void Die() override;
 
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
@@ -65,9 +64,6 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults", meta = (AllowPrivateAccess = true))
 	int32 Level;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults", meta = (AllowPrivateAccess = true))
-	ECharacterClass CharacterClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widgets, meta = (AllowPrivateAccess = true))
 	TObjectPtr<UWidgetComponent> HealthBar;

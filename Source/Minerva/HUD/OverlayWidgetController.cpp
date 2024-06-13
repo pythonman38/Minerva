@@ -4,8 +4,10 @@
 #include "OverlayWidgetController.h"
 
 #include "Minerva/AbilitySystem/AbilityInfo.h"
+#include "Minerva/AbilitySystem/LevelUpInfo.h"
 #include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
 #include "Minerva/AbilitySystem/MinervaAttributeSet.h"
+#include "Minerva/Player/MinervaPlayerState.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
@@ -19,6 +21,11 @@ void UOverlayWidgetController::BroadcastInitialValues()
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
+	auto MinervaPlayerState = CastChecked<AMinervaPlayerState>(PlayerState);
+	MinervaPlayerState->OnXPChangedDelegate.AddUObject(this, &UOverlayWidgetController::OnXPChanged);
+	MinervaPlayerState->OnLevelChangedDelegate
+		.AddLambda([this](int32 NewLevel) {OnPlayerLevelChangedDelegate.Broadcast(NewLevel); });
+
 	const auto MinervaAttributeSet = CastChecked<UMinervaAttributeSet>(AttributeSet);
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(MinervaAttributeSet->GetHealthAttribute())
@@ -66,4 +73,23 @@ void UOverlayWidgetController::OnInitializeStartupAbilities(UMinervaAbilitySyste
 		}
 	);
 	MinervaAbilitySystemComponent->ForEachAbility(BroadcastDelegate);
+}
+
+void UOverlayWidgetController::OnXPChanged(int32 NewXP) const
+{
+	const auto MinervaPlayerState = CastChecked<AMinervaPlayerState>(PlayerState);
+	const auto LevelUpInfo = MinervaPlayerState->LevelUpInfo;
+	checkf(LevelUpInfo, TEXT("Unable to find LevelUpInfo. Please fill out MinveraPlayerState Blueprint!"));
+	const auto Level = LevelUpInfo->FindLevelForXP(NewXP), MaxLevel = LevelUpInfo->LevelUpInformation.Num();
+
+	if (Level <= MaxLevel && Level > 0)
+	{
+		const int32 LevelUpRequirement = LevelUpInfo->LevelUpInformation[Level].LevelUpRequirement,
+			PreviousLevelUpRequirement = LevelUpInfo->LevelUpInformation[Level - 1].LevelUpRequirement,
+			DeltaLevelRequirement = LevelUpRequirement - PreviousLevelUpRequirement,
+			XPForThisLevel = NewXP - PreviousLevelUpRequirement;
+		const float XPBarPercent = static_cast<float>(XPForThisLevel) / static_cast<float>(DeltaLevelRequirement);
+
+		OnXPPercentChangedDelegate.Broadcast(XPBarPercent);
+	}
 }

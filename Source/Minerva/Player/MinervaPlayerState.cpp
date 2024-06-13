@@ -8,7 +8,8 @@
 #include "Net/UnrealNetwork.h"
 
 AMinervaPlayerState::AMinervaPlayerState() :
-	Level(1)
+	Level(1),
+	XP(1)
 {
 	AbilitySystemComponent = CreateDefaultSubobject<UMinervaAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
@@ -24,10 +25,41 @@ void AMinervaPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMinervaPlayerState, Level);
+	DOREPLIFETIME(AMinervaPlayerState, XP);
+}
+
+void AMinervaPlayerState::AddToXP(int32 InXP)
+{
+	XP += InXP;
+	OnXPChangedDelegate.Broadcast(XP);
+}
+
+void AMinervaPlayerState::AddToLevel(int32 InLevel)
+{
+	Level += InLevel;
+	OnLevelChangedDelegate.Broadcast(Level);
+}
+
+void AMinervaPlayerState::SetXP(int32 InXP)
+{
+	XP = InXP;
+	OnXPChangedDelegate.Broadcast(XP);
+}
+
+void AMinervaPlayerState::SetLevel(int32 InLevel)
+{
+	Level = InLevel;
+	OnXPChangedDelegate.Broadcast(Level);
 }
 
 void AMinervaPlayerState::OnRep_Level(int32 OldLevel)
 {
+	OnXPChangedDelegate.Broadcast(Level);
+}
+
+void AMinervaPlayerState::OnRep_XP(int32 OldXP)
+{
+	OnXPChangedDelegate.Broadcast(XP);
 }
 
 UAbilitySystemComponent* AMinervaPlayerState::GetAbilitySystemComponent() const
