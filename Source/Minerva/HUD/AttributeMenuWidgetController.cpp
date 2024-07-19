@@ -4,7 +4,9 @@
 #include "AttributeMenuWidgetController.h"
 
 #include "Minerva/AbilitySystem/AttributeInfo.h"
+#include "Minerva/AbilitySystem/MinervaAbilitySystemComponent.h"
 #include "Minerva/AbilitySystem/MinervaAttributeSet.h"
+#include "Minerva/Player/MinervaPlayerState.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
 
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
@@ -17,6 +19,13 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 				BroadcastAttributeInfo(Pair.Key, Pair.Value());
 			});
 	}
+
+	auto MinervaPlayerState = CastChecked<AMinervaPlayerState>(PlayerState);
+	MinervaPlayerState->OnAttributePointsChangedDelegate.AddLambda([this](int32 Points)
+		{
+			AttributePointsChangedDelegate.Broadcast(Points);
+		}
+	);
 }
 
 void UAttributeMenuWidgetController::BroadcastInitialValues()
@@ -29,6 +38,16 @@ void UAttributeMenuWidgetController::BroadcastInitialValues()
 	{
 		BroadcastAttributeInfo(Pair.Key, Pair.Value());
 	}
+
+	auto MinervaPlayerState = CastChecked<AMinervaPlayerState>(PlayerState);
+	AttributePointsChangedDelegate.Broadcast(MinervaPlayerState->GetAttributePoints());
+
+}
+
+void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)
+{
+	auto MinervaASC = CastChecked<UMinervaAbilitySystemComponent>(AbilitySystemComponent);
+	MinervaASC->UpgradeAttribute(AttributeTag);
 }
 
 void UAttributeMenuWidgetController::BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const

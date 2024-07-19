@@ -3,8 +3,10 @@
 
 #include "MinervaAbilitySystemComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Minerva/MinervaLogChannels.h"
 #include "Minerva/Abilities/MinervaGameplayAbility.h"
+#include "Minerva/Interaction/PlayerInterface.h"
 #include "Minerva/Singletons/MinervaGameplayTags.h"
 
 void UMinervaAbilitySystemComponent::AbilityActorInfoSet()
@@ -69,6 +71,31 @@ void UMinervaAbilitySystemComponent::ForEachAbility(const FForEachAbility& Deleg
 		{
 			UE_LOG(LogMinerva, Error, TEXT("Failed to execute delgate in %hs"), __FUNCTION__);
 		}
+	}
+}
+
+void UMinervaAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
+{
+	if (GetAvatarActor()->Implements<UPlayerInterface>())
+	{
+		if (IPlayerInterface::Execute_GetAttributePoints(GetAvatarActor()) > 0)
+		{
+			ServerUpgradeAttribute(AttributeTag);
+		}
+	}
+}
+
+void UMinervaAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FGameplayTag& AttributeTag)
+{
+	FGameplayEventData Payload;
+	Payload.EventTag = AttributeTag;
+	Payload.EventMagnitude = 1.f;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetAvatarActor(), AttributeTag, Payload);
+
+	if (GetAvatarActor()->Implements<UPlayerInterface>())
+	{
+		IPlayerInterface::Execute_AddToAttributePoints(GetAvatarActor(), -1);
 	}
 }
 

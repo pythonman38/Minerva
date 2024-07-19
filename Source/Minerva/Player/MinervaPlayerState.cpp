@@ -9,7 +9,9 @@
 
 AMinervaPlayerState::AMinervaPlayerState() :
 	Level(1),
-	XP(1)
+	XP(1),
+	AttributePoints(0),
+	SpellPoints(1)
 {
 	AbilitySystemComponent = CreateDefaultSubobject<UMinervaAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
@@ -26,6 +28,8 @@ void AMinervaPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 	DOREPLIFETIME(AMinervaPlayerState, Level);
 	DOREPLIFETIME(AMinervaPlayerState, XP);
+	DOREPLIFETIME(AMinervaPlayerState, AttributePoints);
+	DOREPLIFETIME(AMinervaPlayerState, SpellPoints);
 }
 
 void AMinervaPlayerState::AddToXP(int32 InXP)
@@ -38,6 +42,18 @@ void AMinervaPlayerState::AddToLevel(int32 InLevel)
 {
 	Level += InLevel;
 	OnLevelChangedDelegate.Broadcast(Level);
+}
+
+void AMinervaPlayerState::AddToAtributePoints(int32 InPoints)
+{
+	AttributePoints += InPoints;
+	OnAttributePointsChangedDelegate.Broadcast(AttributePoints);
+}
+
+void AMinervaPlayerState::AddToSpellPoints(int32 InPoints)
+{
+	SpellPoints += InPoints;
+	OnSpellPointsChangedDelegate.Broadcast(SpellPoints);
 }
 
 void AMinervaPlayerState::SetXP(int32 InXP)
@@ -60,6 +76,16 @@ void AMinervaPlayerState::OnRep_Level(int32 OldLevel)
 void AMinervaPlayerState::OnRep_XP(int32 OldXP)
 {
 	OnXPChangedDelegate.Broadcast(XP);
+}
+
+void AMinervaPlayerState::OnRep_AttributePoints(int32 OldAttributePoints)
+{
+	OnAttributePointsChangedDelegate.Broadcast(AttributePoints);
+}
+
+void AMinervaPlayerState::OnRep_SpellPoints(int32 OldSpellPoints)
+{
+	OnSpellPointsChangedDelegate.Broadcast(SpellPoints);
 }
 
 UAbilitySystemComponent* AMinervaPlayerState::GetAbilitySystemComponent() const

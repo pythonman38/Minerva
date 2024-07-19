@@ -80,12 +80,16 @@ void AMinervaCharacter::AddToPlayerLevel_Implementation(int32 AmountToAdd)
 
 void AMinervaCharacter::AddToAttributePoints_Implementation(int32 InAttributePoints)
 {
-	// TODO: Add AttributePoints to PlayerState
+	auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	MinervaPlayerState->AddToAtributePoints(InAttributePoints);
 }
 
 void AMinervaCharacter::AddToSpellPoints_Implementation(int32 InSpellPoints)
 {
-	// TODO: Add SpellPoints to PlayerState
+	auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	MinervaPlayerState->AddToSpellPoints(InSpellPoints);
 }
 
 void AMinervaCharacter::LevelUp_Implementation()
@@ -119,6 +123,20 @@ int32 AMinervaCharacter::FindLevelForXP_Implementation(int32 InXP)
 	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
 	check(MinervaPlayerState);
 	return MinervaPlayerState->LevelUpInfo->FindLevelForXP(InXP);
+}
+
+int32 AMinervaCharacter::GetAttributePoints_Implementation() const
+{
+	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	return MinervaPlayerState->GetAttributePoints();
+}
+
+int32 AMinervaCharacter::GetSpellPoints_Implementation() const
+{
+	const auto MinervaPlayerState = GetPlayerState<AMinervaPlayerState>();
+	check(MinervaPlayerState);
+	return MinervaPlayerState->GetSpellPoints();
 }
 
 void AMinervaCharacter::InitAbilityActorInfo()

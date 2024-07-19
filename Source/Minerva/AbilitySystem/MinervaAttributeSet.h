@@ -66,6 +66,8 @@ public:
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
+	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
+
 	// Primary Attributes
 	UFUNCTION()
 	void OnRep_Strength(const FGameplayAttributeData& OldStrength) const;
@@ -136,6 +138,9 @@ protected:
 	void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalhit) const;
 
 	void SendXPEvent(const FEffectProperties& Props);
+
+private:
+	bool bTopOffHealth, bTopOffMana;
 
 public:
 
